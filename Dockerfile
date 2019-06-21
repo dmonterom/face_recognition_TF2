@@ -7,6 +7,6 @@ RUN apt-get update && apt-get install -y software-properties-common && \
     libtiff-dev libjasper-dev libdc1394-22-dev libx11-dev && \
     apt-get clean && rm -rf /tmp/* /var/tmp/* /var/cache/apt/archives/* /var/lib/apt/lists/*
 
-RUN pip3 install tensorflow-gpu==2.0.0b1 pillow mxnet matplotlib==3.0.3 opencv-python==3.4.1.15
+RUN pip3 install tensorflow-gpu==2.0.0b1 pillow mxnet matplotlib==3.0.3 opencv-python==3.4.1.15 scikit-learn
 
 
