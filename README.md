@@ -2,7 +2,7 @@
 
 The aim of this project is to train an state of art face recognizer using TensorFlow 2.0. The architecture chosen is a modified version of ResNet50 and the loss function used is [ArcFace](https://arxiv.org/pdf/1801.07698.pdf), both originally developed by deepinsight in [mxnet](https://github.com/deepinsight/insightface).
 
-The dataset used for training is the CASIA-Webface dataset used by deepinsight, and can be downloaded from their [model zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo). The images are aligned using mtcnn and cropped to 112x112.
+The dataset used for training is the CASIA-Webface dataset used in [insightface](https://github.com/deepinsight/insightface), and can be downloaded from their [model zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo). The images are aligned using mtcnn and cropped to 112x112.
 
 The net is trained from scratch using a Tesla P100 and a batch size of 16.  
 
@@ -38,7 +38,7 @@ python3 convert_dataset.py
 python3 train.py
 ```
 
-The training process can be follow loading the generated log file (in output/logs) with tensorboard. Its important to check that the regularization loss stops growing after a few number of steps.
+The training process can be followed loading the generated log file (in output/logs) with tensorboard. Its important to check that the regularization loss stops growing after a few number of steps.
 
 <img src="imgs/regularization_loss.svg">
 
