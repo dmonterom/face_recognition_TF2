@@ -244,7 +244,7 @@ def ver_test(data_set, dataset_name, batch_size, model):
 
 
 model = train_model()
-model.load_weights('output/ckpt/full_net6/weights_epoch-15')
+model.load_weights('output/ckpt/weights_epoch-15')
 model = model.resnet
 data_set = load_bin('dataset/faces_webface_112x112/lfw.bin', [112, 112])
 results = ver_test(data_set, 'lfw', 16, model)

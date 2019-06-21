@@ -94,11 +94,10 @@ random.shuffle(z)
 x_train, y_train = zip(*z)
 
 # create log
-summary_writer = tf.summary.create_file_writer('output/logs1')
+summary_writer = tf.summary.create_file_writer('output/logs')
 
 lr_steps = [100000 * 512 / 16, 140000 * 512 / 16, 160000 * 512 / 16]
 
-model.load_weights('output/ckpt/full_net6/weights_epoch-15')
 for epoch in range(EPOCHS):
     for i in range(len(x_train)):
         img = tf.image.decode_jpeg(x_train[i])
@@ -149,4 +148,4 @@ for epoch in range(EPOCHS):
                 if lr_step == step:
                     optimizer.lr = optimizer.lr * 0.1
     model.save_weights(
-        'output/ckpt/full_net7/weights_epoch-{}'.format(epoch + 1))
+        'output/ckpt/weights_epoch-{}'.format(epoch + 1))
