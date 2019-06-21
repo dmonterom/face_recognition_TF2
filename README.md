@@ -64,6 +64,12 @@ python3 verification.py
 | ----- |:-----:|
 | lfw |0.9502|
 
+## TODO
+
+- Further training of the net to improve accuracy (not enought training time).
+- Add quantization awareness to training. This is not yet possible in TensorFlow 2.0, as commented in [this issue](https://github.com/tensorflow/tensorflow/issues/27880).
+- Test other network arquitectures.
+
 ## References
 1. [InsightFace mxnet](https://github.com/deepinsight/insightface)
 2. [InsightFace : Additive Angular Margin Loss for Deep Face Recognition](https://arxiv.org/abs/1801.07698)
