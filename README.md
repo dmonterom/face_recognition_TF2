@@ -70,6 +70,8 @@ The results are worse than the insightface model because:
 | cfp_fp |0.8804|
 | age_db30 |0.8068|
 
+Weights can be downloaded from this [link](https://drive.google.com/open?id=1RrVazZAWgDL26HxtacdeHfOADWERDUHK)
+
 ## TODO
 * ~~The batch size must be bigger but the gpu is exhausted.~~ -> Now using batch 128 by updating the gradients after several inferences.
 * Further training of the net to improve accuracy.
