@@ -76,7 +76,7 @@ Weights can be downloaded from this [link](https://drive.google.com/open?id=1RrV
 * ~~The batch size must be bigger but the gpu is exhausted.~~ -> Now using batch 128 by updating the gradients after several inferences.
 * Further training of the net to improve accuracy.
 * Add quantization awareness to training. This is not yet possible in TensorFlow 2.0 because it was part of the contrib module, which has been removed in the new version, as commented in [this issue](https://github.com/tensorflow/tensorflow/issues/27880).
-* Test other network arquitectures.
+* Test other network architectures.
 * Train the model with a bigger dataset.
 
 ## References
