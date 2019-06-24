@@ -60,7 +60,7 @@ python3 evaluation.py
 
 The results are worse than the insightface model because: 
 * The training epochs are not enough.
-* The batch size should be bigger (16 used).
+* The batch size should be bigger (16 used), as discused in [link](https://github.com/deepinsight/insightface/issues/91) and [link](https://github.com/deepinsight/insightface/issues/86)
 * The training dataset used there has 85K ids and 5.8M images while the dataset used in this project has 10K ids and 0.5M images.
 
 | dbname | accuracy |
@@ -73,7 +73,7 @@ The results are worse than the insightface model because:
 Weights can be downloaded from this [link](https://drive.google.com/open?id=1RrVazZAWgDL26HxtacdeHfOADWERDUHK)
 
 ## TODO
-* ~~The batch size must be bigger but the gpu is exhausted.~~ -> Now using batch 128 by updating the gradients after several inferences.
+* ~~The batch size must be bigger but the gpu is exhausted.~~ -> Now using batch 128 by updating the gradients after several inferences. 
 * Further training of the net to improve accuracy.
 * Add quantization awareness to training. This is not yet possible in TensorFlow 2.0 because it was part of the contrib module, which has been removed in the new version, as commented in [this issue](https://github.com/tensorflow/tensorflow/issues/27880).
 * Test other network architectures.
