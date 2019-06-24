@@ -6,9 +6,10 @@ The dataset used for training is the CASIA-Webface dataset used in [insightface]
 
 The results of the training are evaluated with lfw, cfp_ff, cfp_fp and age_db30, using the same metrics as deepinsight.
 
+The full training and evaluation code is provided.
+
 A Dockerfile is also provided with all prerequisites installed.
 
-The full training and evaluation code is provided.
 
 ### Prerequisites
 
