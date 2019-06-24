@@ -15,7 +15,7 @@ The full training and evaluation code is provided.
 If you are not using the provided dockerfile, you will need to install the following packages:
 
 ```
-pip3 install tensorflow-gpu==2.0.0b1 pillow mxnet matplotlib==3.0.3 opencv-python==3.4.1.15
+pip3 install tensorflow-gpu==2.0.0b1 pillow mxnet matplotlib==3.0.3 opencv-python==3.4.1.15 scikit-learn
 ```
 
 ### Preparing the dataset
