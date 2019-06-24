@@ -45,7 +45,7 @@ print("Preparing model...")
 model = train_model()
 
 # loss_object = tf.keras.losses.CategoricalCrossentropy()
-learning_rate = 0.00001
+learning_rate = 0.1
 optimizer = tf.keras.optimizers.SGD(
     lr=learning_rate, decay=0.0, momentum=0.9, nesterov=False)
 # optimizer = tf.keras.optimizers.Adam(
