@@ -60,7 +60,7 @@ python3 evaluation.py
 
 The results are worse than the insightface model because: 
 * The training epochs are not enough.
-* The batch size should be bigger (16 used), as discused in [link](https://github.com/deepinsight/insightface/issues/91) and [link](https://github.com/deepinsight/insightface/issues/86)
+* The batch size should be bigger (16 used), as discused [here](https://github.com/deepinsight/insightface/issues/91) and [here](https://github.com/deepinsight/insightface/issues/86)
 * The training dataset used there has 85K ids and 5.8M images while the dataset used in this project has 10K ids and 0.5M images.
 
 | dbname | accuracy |
