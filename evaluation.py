@@ -233,19 +233,26 @@ def test(data_set, batch_size, model):
 
 
 def ver_test(data_set, dataset_name, batch_size, model):
-    results = []
-    acc1, std1, acc2, std2, xnorm, embeddings_list = test(data_set=data_set,
-                                                        batch_size=batch_size,
-                                                        model=model)
-    print('[%s]XNorm: %f' % (dataset_name, xnorm))
-    print('[%s]Accuracy-Flip: %1.5f+-%1.5f' % (dataset_name, acc2, std2))
-    results.append(acc2)
-    return results
+    for i in range(len(dataset_name)):
+        print('testing %s..' % (dataset_name[i]))
+        acc1, std1, acc2, std2, xnorm, embeddings_list = test(data_set=data_set[i],
+                                                            batch_size=batch_size,
+                                                            model=model)
+        print('[%s]XNorm: %f' % (dataset_name[i], xnorm))
+        print('[%s]Accuracy: %1.5f+-%1.5f' % (dataset_name[i], acc2, std2))
 
 
-model = train_model()
-model.load_weights('output/ckpt/weights_epoch-15')
-model = model.resnet
-data_set = load_bin('dataset/faces_webface_112x112/lfw.bin', [112, 112])
-results = ver_test(data_set, 'lfw', 16, model)
-print('test accuracy is: ', str(results[0]))
+tmodel = train_model()
+tmodel.load_weights('output/ckpt/weights_epoch-50')
+model = tmodel.resnet
+dataset = []
+dataset_name = []
+dataset.append(load_bin('dataset/faces_webface_112x112/lfw.bin', [112, 112]))
+dataset_name.append('lfw')
+dataset.append(load_bin('dataset/faces_webface_112x112/cfp_ff.bin', [112, 112]))
+dataset_name.append('cfp_ff')
+dataset.append(load_bin('dataset/faces_webface_112x112/cfp_fp.bin', [112, 112]))
+dataset_name.append('cfp_fp')
+dataset.append(load_bin('dataset/faces_webface_112x112/agedb_30.bin', [112, 112]))
+dataset_name.append('agedb_30')
+ver_test(dataset, dataset_name, 16, model)

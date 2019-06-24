@@ -3,6 +3,7 @@ import tensorflow as tf
 import random
 
 batch_size = 16
+batch_multiplier = 8
 
 
 def parse_dataset():
@@ -36,7 +37,6 @@ def parse_dataset():
 print("Preparing dataset...")
 
 x_train, y_train, length = parse_dataset()
-# train_gene = train_Generator_xandy()
 
 print("Done.")
 
@@ -45,7 +45,7 @@ print("Preparing model...")
 model = train_model()
 
 # loss_object = tf.keras.losses.CategoricalCrossentropy()
-learning_rate = 0.01
+learning_rate = 0.00001
 optimizer = tf.keras.optimizers.SGD(
     lr=learning_rate, decay=0.0, momentum=0.9, nesterov=False)
 # optimizer = tf.keras.optimizers.Adam(
@@ -61,8 +61,13 @@ regularization_loss = tf.keras.metrics.Mean(
 
 @tf.function
 def train_step(images, labels):
+    # print(images, labels)
     with tf.GradientTape() as tape:
-        logits = model(images, labels)
+        logits = model(tf.slice(images, [0, 0, 0, 0], [
+                       16, 112, 112, 3]), tf.slice(labels, [0], [16]))
+        for i in range(batch_multiplier - 1):
+            logits = tf.concat([logits, model(tf.slice(images, [16*(i+1), 0, 0, 0], [
+                       16, 112, 112, 3]), tf.slice(labels, [16*(i+1)], [16]))], 0)
         pred = tf.nn.softmax(logits)
         # y = tf.one_hot(labels, depth=10572)
         # inf_loss = loss_object(y_true=y, y_pred=pred)
@@ -75,11 +80,13 @@ def train_step(images, labels):
         gradients[i] /= 10572
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
     train_loss(loss)
-    train_accuracy(
+    # train_accuracy(
+    #     tf.cast(tf.equal(tf.argmax(pred, axis=1), labels), dtype=tf.float32))
+    accuracy = tf.reduce_mean(
         tf.cast(tf.equal(tf.argmax(pred, axis=1), labels), dtype=tf.float32))
     inference_loss(inf_loss)
     regularization_loss(reg_loss)
-    return gradients
+    return gradients, accuracy
 
 
 EPOCHS = 100000
@@ -96,7 +103,11 @@ x_train, y_train = zip(*z)
 # create log
 summary_writer = tf.summary.create_file_writer('output/logs')
 
-lr_steps = [100000 * 512 / 16, 140000 * 512 / 16, 160000 * 512 / 16]
+lr_steps = [100000 * 512 / (batch_size*batch_multiplier), 140000
+            * 512 / (batch_size*batch_multiplier), 160000 * 512 / (batch_size*batch_multiplier)]
+
+lower_loss = 18.2
+loss_i = 0
 
 for epoch in range(EPOCHS):
     for i in range(len(x_train)):
@@ -115,18 +126,18 @@ for epoch in range(EPOCHS):
         list_img.append(img)
         list_label.append(label)
         batch_idx += 1
-        if (batch_idx == batch_size):
+        if (batch_idx == batch_size * batch_multiplier):
             step += 1
             batch_idx = 0
             batch_img = tf.concat(list_img, axis=0)
             batch_label = tf.stack(list_label, axis=0)
-            gradients = train_step(
+            gradients, accuracy = train_step(
                 batch_img, batch_label)
             if step % 10 == 0:
                 template = 'Epoch {}, Step {}, Loss: {}, Accuracy: {}'
                 print(template.format(epoch + 1, step,
                                       train_loss.result(),
-                                      train_accuracy.result() * 100))
+                                      accuracy))
                 with summary_writer.as_default():
                     tf.summary.scalar(
                         'train loss', train_loss.result(), step=step)
@@ -135,15 +146,13 @@ for epoch in range(EPOCHS):
                     tf.summary.scalar(
                         'regularization loss', regularization_loss.result(), step=step)
                     tf.summary.scalar(
-                        'train accuracy', train_accuracy.result(), step=step)
+                        'train accuracy', accuracy, step=step)
                     tf.summary.scalar(
                         'learning rate', learning_rate, step=step)
                     for i in range(len(gradients)):
                         gradient_name = model.trainable_variables[i].name
                         tf.summary.histogram(
                             gradient_name + '/gradient', gradients[i], step=step)
-                    # layer_output = model.get_layer('').output
-                    # tf.summary.histogram('name', layer_output)
             for lr_step in lr_steps:
                 if lr_step == step:
                     optimizer.lr = optimizer.lr * 0.1

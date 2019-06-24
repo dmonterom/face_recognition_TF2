@@ -4,13 +4,11 @@ The aim of this project is to train an state of art face recognizer using Tensor
 
 The dataset used for training is the CASIA-Webface dataset used in [insightface](https://github.com/deepinsight/insightface), and can be downloaded from their [model zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo). The images are aligned using mtcnn and cropped to 112x112.
 
-The net is trained from scratch using a Tesla P100 and a batch size of 16.  
-
 The results of the training are evaluated with lfw, using the same metrics as deepinsight.
 
 A Dockerfile is also provided with all prerequisites installed.
 
-The full training and testing code is provided.
+The full training and evaluation code is provided.
 
 ### Prerequisites
 
@@ -48,26 +46,34 @@ As the net is trained from scratch, a lot of epochs will be needed to train the 
 
 Its normal that the training accuracy of the model remains 0 after several epochs because of the huge number of classes, so if you want to test the accuracy launch the lfw verification test.
 
-### Launching verification test
+### Evaluating the model
 
-The model will be tested using the lfw database. The metrics are the same used in insightface.
+The model can be evaluated using the lfw, cfp_ff, cfp_fp and age_db30 databases. The metrics are the same used in insightface.
 
-Before launching the test set checkpoint path in the verification.py script.
+Before launching the test set checkpoint path in the evaluation.py script.
 
 ```
-python3 verification.py
+python3 evaluation.py
 ```
 
 ### accuracy
 
+The results are worse than the insightface model because: 
+* The training epochs are not enough.
+* The batch size should be bigger (16 used).
+* The training dataset used there has 85K ids and 5.8M images while the dataset used in this project has 10K ids and 0.5M images.
+
 | dbname | accuracy |
 | ----- |:-----:|
-| lfw |0.9502|
+| lfw |0.9620|
+| cfp_ff |0.9551|
+| cfp_fp |0.8804|
+| age_db30 |0.8068|
 
 ## TODO
-
-- Further training of the net to improve accuracy (not enought training time).
-- Add quantization awareness to training. This is not yet possible in TensorFlow 2.0, as commented in [this issue](https://github.com/tensorflow/tensorflow/issues/27880).
+* ~~The batch size must be bigger but the gpu is exhausted.~~ -> Now using batch 128 by updating the gradients after several inferences.
+* Further training of the net to improve accuracy.
+* Add quantization awareness to training. This is not yet possible in TensorFlow 2.0, as commented in [this issue](https://github.com/tensorflow/tensorflow/issues/27880).
 - Test other network arquitectures.
 
 ## References
