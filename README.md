@@ -4,7 +4,7 @@ The aim of this project is to train an state of art face recognizer using Tensor
 
 The dataset used for training is the CASIA-Webface dataset used in [insightface](https://github.com/deepinsight/insightface), and can be downloaded from their [model zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo). The images are aligned using mtcnn and cropped to 112x112.
 
-The results of the training are evaluated with lfw, using the same metrics as deepinsight.
+The results of the training are evaluated with lfw, cfp_ff, cfp_fp and age_db30, using the same metrics as deepinsight.
 
 A Dockerfile is also provided with all prerequisites installed.
 
