@@ -101,7 +101,7 @@ random.shuffle(z)
 x_train, y_train = zip(*z)
 
 # create log
-summary_writer = tf.summary.create_file_writer('output/logs')
+summary_writer = tf.summary.create_file_writer('output/log')
 
 lr_steps = [100000 * 512 / (batch_size*batch_multiplier), 140000
             * 512 / (batch_size*batch_multiplier), 160000 * 512 / (batch_size*batch_multiplier)]
