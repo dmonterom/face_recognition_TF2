@@ -71,8 +71,8 @@ def train_step(images, labels):
         pred = tf.nn.softmax(logits)
         # y = tf.one_hot(labels, depth=10572)
         # inf_loss = loss_object(y_true=y, y_pred=pred)
-        inf_loss = tf.nn.sparse_softmax_cross_entropy_with_logits(
-            logits=logits, labels=labels)
+        inf_loss = tf.reduce_mean(
+            tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels))
         reg_loss = model.losses
         loss = inf_loss + reg_loss
     gradients = tape.gradient(loss, model.trainable_variables)
