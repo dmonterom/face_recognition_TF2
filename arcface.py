@@ -13,7 +13,7 @@ class Arcfacelayer(tf.keras.layers.Layer):
         self.kernel = self.add_weight(name='kernel',
                                       shape=(input_shape[-1],
                                              self.output_dim),
-                                      initializer=tf.keras.initializers.glorot_uniform(),
+                                      initializer='glorot_normal',
                                       regularizer=tf.keras.regularizers.l2(
                                           l=5e-4),
                                       trainable=True)
