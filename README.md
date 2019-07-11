@@ -60,7 +60,7 @@ The results are worse than the insightface model because:
 
 ##### model A
 | model name    | train db| normalization layer |batch size| total_steps | download |
-| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|
 | model A | casia |batch normalization|16*8| 150k |[model a](https://drive.google.com/open?id=1RrVazZAWgDL26HxtacdeHfOADWERDUHK)|
 
 
