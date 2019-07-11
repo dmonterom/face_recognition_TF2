@@ -73,7 +73,7 @@ The results are worse than the insightface model because:
 
 
 ## TODO
-* ~~The batch size must be bigger but the gpu is exhausted.~~ -> Now using batch 128 by updating the gradients after several inferences. 
+* ~~The batch size must be bigger but the gpu is exhausted.~~ -> Now using batch ~~128~~ 96 by updating the gradients after several inferences. 
 * ~~Further training of the net to improve accuracy.~~
 * ~~Add batch renormalization for training using small batches.~~ ([link](https://arxiv.org/pdf/1702.03275.pdf))
 * ~~Add group normalization for training using small batches.~~ ([link](https://arxiv.org/pdf/1803.08494.pdf))
