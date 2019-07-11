@@ -1,9 +1,11 @@
 import tensorflow as tf
 import math
 
+num_classes = 85742  # 10572
+
 
 class Arcfacelayer(tf.keras.layers.Layer):
-    def __init__(self, output_dim=10572, s=64., m=0.50):
+    def __init__(self, output_dim=num_classes, s=64., m=0.50):
         self.output_dim = output_dim
         self.s = s
         self.m = m

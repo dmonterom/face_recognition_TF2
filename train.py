@@ -1,9 +1,11 @@
-from resnet import train_model
+# from resnet_groupNorm import train_model
+from resnet_batchRenorm import train_model
+# from resnet import train_model
 import tensorflow as tf
 import random
 
 batch_size = 16
-batch_multiplier = 8
+batch_multiplier = 6
 
 
 def parse_function(example_proto):
@@ -18,11 +20,12 @@ def parse_function(example_proto):
     img = tf.subtract(img, 127.5)
     img = tf.multiply(img, 0.0078125)
     img = tf.image.random_flip_left_right(img)
-    label = tf.cast(features['label'], tf.int64)
+    label = tf.cast(features['label'], tf.int32)
     return img, label
 
 
-dataset = tf.data.TFRecordDataset('dataset/converted_dataset/train.tfrecord')
+dataset = tf.data.TFRecordDataset(
+    'dataset/converted_dataset/ms1m_train.tfrecord')
 dataset = dataset.map(parse_function)
 dataset = dataset.shuffle(buffer_size=20000)
 dataset = dataset.batch(batch_size * batch_multiplier)
@@ -31,17 +34,17 @@ print("Preparing model...")
 
 model = train_model()
 
-learning_rate = 0.0005  # 0.0003
+learning_rate = 0.0005  # 0.0005
 optimizer = tf.keras.optimizers.SGD(
     lr=learning_rate, momentum=0.9, nesterov=False)
 # optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
 # optimizer = tf.keras.optimizers.Adagrad(lr=learning_rate, decay=0.0)
-train_loss = tf.keras.metrics.Mean(name='train_loss')
+# train_loss = tf.keras.metrics.Mean(name='train_loss')
 # train_accuracy = tf.keras.metrics.Mean(
 #     name='train_accuracy')
-inference_loss = tf.keras.metrics.Mean(name='inference_loss')
-regularization_loss = tf.keras.metrics.Mean(
-    name='regularization_loss')
+# inference_loss = tf.keras.metrics.Mean(name='inference_loss')
+# regularization_loss = tf.keras.metrics.Mean(
+#    name='regularization_loss')
 
 
 @tf.function
@@ -54,26 +57,26 @@ def train_step(images, labels):
             logits = tf.concat([logits, model(tf.slice(images, [batch_size * (i + 1), 0, 0, 0], [
                                batch_size, 112, 112, 3]), tf.slice(labels, [batch_size * (i + 1)], [batch_size]))], 0)
         pred = tf.nn.softmax(logits)
+        # epsilon = tf.constant(value=0.00001)
+        # logits = logits + epsilon
         inf_loss = tf.reduce_mean(
             tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels))
         reg_loss = tf.add_n(model.losses)
         loss = inf_loss + reg_loss
     gradients = tape.gradient(loss, model.trainable_variables)
     optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-    train_loss(loss)
+    # train_loss(loss)
+    train_loss = tf.reduce_mean(loss)
     accuracy = tf.reduce_mean(
-        tf.cast(tf.equal(tf.argmax(pred, axis=1), labels), dtype=tf.float32))
-    inference_loss(inf_loss)
-    regularization_loss(reg_loss)
-    return accuracy
+        tf.cast(tf.equal(tf.argmax(pred, axis=1, output_type=tf.dtypes.int32), labels), dtype=tf.float32))
+    inference_loss = tf.reduce_mean(inf_loss)
+    regularization_loss = tf.reduce_mean(reg_loss)
+    # inference_loss(inf_loss)
+    # regularization_loss(reg_loss)
+    return accuracy, train_loss, inference_loss, regularization_loss
 
 
 EPOCHS = 100000
-
-batch_idx = 0
-list_img = []
-list_label = []
-step = 0
 
 # create log
 summary_writer = tf.summary.create_file_writer('output/log')
@@ -82,7 +85,6 @@ lr_steps = [40000 * 512 / (batch_size * batch_multiplier),
             60000 * 512 / (batch_size * batch_multiplier),
             80000 * 512 / (batch_size * batch_multiplier),
             120000 * 512 / (batch_size * batch_multiplier)]
-
 step = 0
 for epoch in range(EPOCHS):
     iterator = iter(dataset)
@@ -90,24 +92,22 @@ for epoch in range(EPOCHS):
         img, label = next(iterator)
         if (img.shape[0] != batch_size * batch_multiplier or img.shape[0] != label.shape[0]):
             print("End of epoch {}".format(epoch + 1))
-            model.save_weights(
-                'output/ckpt/ckpt/weights_epoch-{}'.format(epoch + 1))
             break
         step += 1
-        accuracy = train_step(
+        accuracy, train_loss, inference_loss, regularization_loss = train_step(
             img, label)
         if step % 10 == 0:
             template = 'Epoch {}, Step {}, Loss: {}, Accuracy: {}'
             print(template.format(epoch + 1, step,
-                                  train_loss.result(),
+                                  train_loss,
                                   accuracy))
             with summary_writer.as_default():
                 tf.summary.scalar(
-                    'train loss', train_loss.result(), step=step)
+                    'train loss', train_loss, step=step)
                 tf.summary.scalar(
-                    'inference loss', inference_loss.result(), step=step)
+                    'inference loss', inference_loss, step=step)
                 tf.summary.scalar(
-                    'regularization loss', regularization_loss.result(), step=step)
+                    'regularization loss', regularization_loss, step=step)
                 tf.summary.scalar(
                     'train accuracy', accuracy, step=step)
                 tf.summary.scalar(
@@ -121,6 +121,9 @@ for epoch in range(EPOCHS):
                 #         weight.name, weight, step=step)
                 # layer_output = model.get_layer('').output
                 # tf.summary.histogram('name', layer_output)
+        if step % 4000 == 0 and step > 0:
+            model.save_weights(
+                'output/ckpt/weights_step-{}'.format(step))
         for lr_step in lr_steps:
             if lr_step == step:
                 optimizer.lr = optimizer.lr * 0.5

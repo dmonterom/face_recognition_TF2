@@ -11,9 +11,9 @@ def parse_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         description='data path information'
     )
-    parser.add_argument('--bin_path', default='faces_webface_112x112/train.rec', type=str,
+    parser.add_argument('--bin_path', default='faces_ms1m-refine-v2_112x112/train.rec', type=str,
                         help='path to the binary image file')
-    parser.add_argument('--idx_path', default='faces_webface_112x112/train.idx', type=str,
+    parser.add_argument('--idx_path', default='faces_ms1m-refine-v2_112x112/train.idx', type=str,
                         help='path to the image index path')
     parser.add_argument('--tfrecords_file_path', default='converted_dataset', type=str,
                         help='path to the output of tfrecords file path')
@@ -22,7 +22,7 @@ def parse_args():
 
 
 def mx2tfrecords(imgidx, imgrec, args):
-    output_path = os.path.join(args.tfrecords_file_path, 'train.tfrecord')
+    output_path = os.path.join(args.tfrecords_file_path, 'ms1m_train.tfrecord')
     writer = tf.data.experimental.TFRecordWriter(output_path)
 
     def generator():

@@ -2,7 +2,7 @@
 
 The aim of this project is to train a state of art face recognizer using TensorFlow 2.0. The architecture chosen is a modified version of ResNet50 and the loss function used is [ArcFace](https://arxiv.org/pdf/1801.07698.pdf), both originally developed by deepinsight in [mxnet](https://github.com/deepinsight/insightface). The choice of the network was made taking into account that it should have enough complexity to achive good results and that it should be relatively easy trainable from scratch. With regard to the loss function, it has been proved that ArcFace is the best loss function for face recognition to date.
 
-The dataset used for training is the CASIA-Webface dataset used in [insightface](https://github.com/deepinsight/insightface), and it is available their [model zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo). The images are aligned using mtcnn and cropped to 112x112.
+The dataset used for training is the ~~CASIA-Webface~~ MS1M-ArcFace dataset used in [insightface](https://github.com/deepinsight/insightface), and it is available their [model zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo). The images are aligned using mtcnn and cropped to 112x112.
 
 The results of the training are evaluated with lfw, cfp_ff, cfp_fp and age_db30, using the same metrics as deepinsight.
 
@@ -21,7 +21,7 @@ pip3 install tensorflow-gpu==2.0.0b1 pillow mxnet matplotlib==3.0.3 opencv-pytho
 
 ### Preparing the dataset
 
-Download the CASIA-Webface dataset from [insightface model zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo) and unzip it to the dataset folder.
+Download the ~~CASIA-Webface~~ MS1M-ArcFace dataset from [insightface model zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo) and unzip it to the dataset folder.
 
 Convert the dataset to the tensorflow format:
 
@@ -37,17 +37,7 @@ python3 convert_dataset.py
 python3 train.py
 ```
 
-The training process can be followed loading the generated log file (in output/logs) with tensorboard. Its important to check that the regularization loss starts decreasing after a few number of steps.
-
-<img src="imgs/regularization_loss.svg">
-
-As the net is trained from scratch, a lot of epochs will be needed to train the model and the loss will vary very slowly.
-
-<img src="imgs/train_loss.svg">
-
-The accuracy will start growing after the first epoch.
-
-<img src="imgs/accuracy.svg">
+The training process can be followed loading the generated log file (in output/logs) with tensorboard.
 
 ### Evaluating the model
 
@@ -66,6 +56,14 @@ The results are worse than the insightface model because:
 * ~~The batch size should be bigger (16 used), as discused [here](https://github.com/deepinsight/insightface/issues/91) and [here](https://github.com/deepinsight/insightface/issues/86)~~
 * The training dataset used there has 85K ids and 5.8M images while the dataset used in this project has 10K ids and 0.5M images.
 
+#### Trained models
+
+##### model A
+| model name    | train db| normalization layer |batch size| total_steps | download |
+| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+| model A | casia |batch normalization|16*8| 150k |[model a](https://drive.google.com/open?id=1RrVazZAWgDL26HxtacdeHfOADWERDUHK)|
+
+
 | dbname | accuracy |
 | ----- |:-----:|
 | lfw |0.9772|
@@ -73,11 +71,12 @@ The results are worse than the insightface model because:
 | cfp_fp |0.8786|
 | age_db30 |0.8752|
 
-Weights can be downloaded from this [link](https://drive.google.com/open?id=1gO8hyOTa0gz7QQj2leB2MJusvschc5rQ)
 
 ## TODO
-* ~~The batch size must be bigger but the gpu is exhausted.~~ -> Now using batch 128 by calculating the gradients after several inferences (creating a larger batch).
+* ~~The batch size must be bigger but the gpu is exhausted.~~ -> Now using batch 128 by updating the gradients after several inferences. 
 * ~~Further training of the net to improve accuracy.~~
+* ~~Add batch renormalization for training using small batches.~~ ([link](https://arxiv.org/pdf/1702.03275.pdf))
+* ~~Add group normalization for training using small batches.~~ ([link](https://arxiv.org/pdf/1803.08494.pdf))
 * Train the model with a bigger dataset.
 * Add quantization awareness to training. This is not yet possible in TensorFlow 2.0 because it was part of the contrib module, which has been removed in the new version, as commented in [this issue](https://github.com/tensorflow/tensorflow/issues/27880).
 * Test other network architectures.

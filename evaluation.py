@@ -27,6 +27,8 @@ def calculate_roc(thresholds, embeddings1, embeddings2, actual_issame, nrof_fold
     if pca == 0:
         diff = np.subtract(embeddings1, embeddings2)
         dist = np.sum(np.square(diff), 1)
+        # for i in range(len(dist)):
+        #     dist[i] = abs(np.dot(embeddings1[i], embeddings2[i]))
 
     for fold_idx, (train_set, test_set) in enumerate(k_fold.split(indices)):
         # print('train_set', train_set)
@@ -46,13 +48,17 @@ def calculate_roc(thresholds, embeddings1, embeddings2, actual_issame, nrof_fold
             # print(embed1.shape, embed2.shape)
             diff = np.subtract(embed1, embed2)
             dist = np.sum(np.square(diff), 1)
+            # for i in range(len(dist)):
+            #     dist[i] = abs(np.dot(embed1[i], embed1[i]))
 
         # Find the best threshold for the fold
         acc_train = np.zeros((nrof_thresholds))
         for threshold_idx, threshold in enumerate(thresholds):
-            _, _, acc_train[threshold_idx] = calculate_accuracy(threshold, dist[train_set], actual_issame[train_set])
+            _, _, acc_train[threshold_idx] = calculate_accuracy(
+                threshold, dist[train_set], actual_issame[train_set])
         best_threshold_index = np.argmax(acc_train)
-        print('best_threshold_index', best_threshold_index, acc_train[best_threshold_index])
+        print('best_threshold_index', best_threshold_index,
+              acc_train[best_threshold_index])
         for threshold_idx, threshold in enumerate(thresholds):
             tprs[fold_idx, threshold_idx], fprs[fold_idx, threshold_idx], _ = calculate_accuracy(threshold,
                                                                                                  dist[test_set],
@@ -68,9 +74,11 @@ def calculate_roc(thresholds, embeddings1, embeddings2, actual_issame, nrof_fold
 
 def calculate_accuracy(threshold, dist, actual_issame):
     predict_issame = np.less(dist, threshold)
+    # predict_issame = np.less(threshold, dist)
     tp = np.sum(np.logical_and(predict_issame, actual_issame))
     fp = np.sum(np.logical_and(predict_issame, np.logical_not(actual_issame)))
-    tn = np.sum(np.logical_and(np.logical_not(predict_issame), np.logical_not(actual_issame)))
+    tn = np.sum(np.logical_and(np.logical_not(
+        predict_issame), np.logical_not(actual_issame)))
     fn = np.sum(np.logical_and(np.logical_not(predict_issame), actual_issame))
 
     tpr = 0 if (tp + fn == 0) else float(tp) / float(tp + fn)
@@ -108,14 +116,16 @@ def calculate_val(thresholds, embeddings1, embeddings2, actual_issame, far_targe
         # Find the threshold that gives FAR = far_target
         far_train = np.zeros(nrof_thresholds)
         for threshold_idx, threshold in enumerate(thresholds):
-            _, far_train[threshold_idx] = calculate_val_far(threshold, dist[train_set], actual_issame[train_set])
+            _, far_train[threshold_idx] = calculate_val_far(
+                threshold, dist[train_set], actual_issame[train_set])
         if np.max(far_train) >= far_target:
             f = interpolate.interp1d(far_train, thresholds, kind='slinear')
             threshold = f(far_target)
         else:
             threshold = 0.0
 
-        val[fold_idx], far[fold_idx] = calculate_val_far(threshold, dist[test_set], actual_issame[test_set])
+        val[fold_idx], far[fold_idx] = calculate_val_far(
+            threshold, dist[test_set], actual_issame[test_set])
 
     val_mean = np.mean(val)
     far_mean = np.mean(far)
@@ -126,7 +136,8 @@ def calculate_val(thresholds, embeddings1, embeddings2, actual_issame, far_targe
 def calculate_val_far(threshold, dist, actual_issame):
     predict_issame = np.less(dist, threshold)
     true_accept = np.sum(np.logical_and(predict_issame, actual_issame))
-    false_accept = np.sum(np.logical_and(predict_issame, np.logical_not(actual_issame)))
+    false_accept = np.sum(np.logical_and(
+        predict_issame, np.logical_not(actual_issame)))
     n_same = np.sum(actual_issame)
     n_diff = np.sum(np.logical_not(actual_issame))
     val = float(true_accept) / float(n_same)
@@ -145,6 +156,7 @@ def evaluate(embeddings, actual_issame, nrof_folds=10, pca=0):
     val, val_std, far = calculate_val(thresholds, embeddings1, embeddings2,
                                       np.asarray(actual_issame), 1e-3, nrof_folds=nrof_folds)
     return tpr, fpr, accuracy, val, val_std, far
+
 
 def load_bin(path, image_size):
     bins, issame_list = pickle.load(
@@ -172,7 +184,8 @@ def load_bin(path, image_size):
 def data_iter(datasets, batch_size):
     data_num = datasets.shape[0]
     for i in range(0, data_num, batch_size):
-        yield datasets[i:min(i+batch_size, data_num), ...]
+        yield datasets[i:min(i + batch_size, data_num), ...]
+
 
 def test(data_set, batch_size, model):
     '''
@@ -182,7 +195,6 @@ def test(data_set, batch_size, model):
     :param model:
     :return:
     '''
-    print('testing verification..')
     data_list = data_set[0]
     issame_list = data_set[1]
     embeddings_list = []
@@ -203,10 +215,11 @@ def test(data_set, batch_size, model):
             if embeddings is None:
                 embeddings = np.zeros((datas.shape[0], _embeddings.shape[1]))
             try:
-                embeddings[idx*batch_size:min((idx+1)*batch_size, datas.shape[0]), ...] = _embeddings
+                embeddings[idx * batch_size:min((idx + 1) *
+                                                batch_size, datas.shape[0]), ...] = _embeddings
             except ValueError:
                 print('idx*batch_size value is %d min((idx+1)*batch_size, datas.shape[0]) %d, batch_size %d, data.shape[0] %d' %
-                      (idx*batch_size, min((idx+1)*batch_size, datas.shape[0]), batch_size, datas.shape[0]))
+                      (idx * batch_size, min((idx + 1) * batch_size, datas.shape[0]), batch_size, datas.shape[0]))
                 print('embedding shape is ', _embeddings.shape)
         embeddings_list.append(embeddings)
 
@@ -227,32 +240,37 @@ def test(data_set, batch_size, model):
     embeddings = sklearn.preprocessing.normalize(embeddings)
     print(embeddings.shape)
     print('infer time', time_consumed)
-    _, _, accuracy, val, val_std, far = evaluate(embeddings, issame_list, nrof_folds=10)
+    _, _, accuracy, val, val_std, far = evaluate(
+        embeddings, issame_list, nrof_folds=10)
     acc2, std2 = np.mean(accuracy), np.std(accuracy)
-    return acc1, std1, acc2, std2, _xnorm, embeddings_list
+    return acc1, std1, acc2, std2, _xnorm
 
 
 def ver_test(data_set, dataset_name, batch_size, model):
     for i in range(len(dataset_name)):
         print('testing %s..' % (dataset_name[i]))
-        acc1, std1, acc2, std2, xnorm, embeddings_list = test(data_set=data_set[i],
-                                                            batch_size=batch_size,
-                                                            model=model)
+        acc1, std1, acc2, std2, xnorm = test(data_set=data_set[i],
+                                             batch_size=batch_size,
+                                             model=model)
         print('[%s]XNorm: %f' % (dataset_name[i], xnorm))
         print('[%s]Accuracy: %1.5f+-%1.5f' % (dataset_name[i], acc2, std2))
 
 
 tmodel = train_model()
-tmodel.load_weights('output/ckpt/weights_epoch-50')
-model = tmodel.resnet
 dataset = []
 dataset_name = []
 dataset.append(load_bin('dataset/faces_webface_112x112/lfw.bin', [112, 112]))
 dataset_name.append('lfw')
-dataset.append(load_bin('dataset/faces_webface_112x112/cfp_ff.bin', [112, 112]))
+dataset.append(
+    load_bin('dataset/faces_webface_112x112/cfp_ff.bin', [112, 112]))
 dataset_name.append('cfp_ff')
-dataset.append(load_bin('dataset/faces_webface_112x112/cfp_fp.bin', [112, 112]))
+dataset.append(
+    load_bin('dataset/faces_webface_112x112/cfp_fp.bin', [112, 112]))
 dataset_name.append('cfp_fp')
-dataset.append(load_bin('dataset/faces_webface_112x112/agedb_30.bin', [112, 112]))
+dataset.append(
+    load_bin('dataset/faces_webface_112x112/agedb_30.bin', [112, 112]))
 dataset_name.append('agedb_30')
-ver_test(dataset, dataset_name, 16, model)
+for i in [52000]:
+    tmodel.load_weights('output/ckpt/weights_step-%d' % i)
+    model = tmodel.resnet
+    ver_test(dataset, dataset_name, 16, model)
