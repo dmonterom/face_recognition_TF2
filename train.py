@@ -81,10 +81,11 @@ EPOCHS = 100000
 # create log
 summary_writer = tf.summary.create_file_writer('output/log')
 
-lr_steps = [40000 * 512 / (batch_size * batch_multiplier),
-            60000 * 512 / (batch_size * batch_multiplier),
-            80000 * 512 / (batch_size * batch_multiplier),
-            120000 * 512 / (batch_size * batch_multiplier)]
+lr_steps = [int(40000 * 512 / (batch_size * batch_multiplier)),
+            int(60000 * 512 / (batch_size * batch_multiplier)),
+            int(80000 * 512 / (batch_size * batch_multiplier)),
+            int(120000 * 512 / (batch_size * batch_multiplier))]
+print(lr_steps)
 step = 0
 for epoch in range(EPOCHS):
     iterator = iter(dataset)
@@ -97,9 +98,10 @@ for epoch in range(EPOCHS):
         accuracy, train_loss, inference_loss, regularization_loss = train_step(
             img, label)
         if step % 10 == 0:
-            template = 'Epoch {}, Step {}, Loss: {}, Accuracy: {}'
+            template = 'Epoch {}, Step {}, Loss: {}, Reg loss: {}, Accuracy: {}'
             print(template.format(epoch + 1, step,
-                                  train_loss,
+                                  inference_loss,
+                                  regularization_loss,
                                   accuracy))
             with summary_writer.as_default():
                 tf.summary.scalar(

@@ -63,7 +63,6 @@ The results are worse than the insightface model because:
 | ----- |:-----:|:-----:|:-----:|:-----:|:-----:|
 | model A | casia |batch normalization|16*8| 150k |[model a](https://drive.google.com/open?id=1RrVazZAWgDL26HxtacdeHfOADWERDUHK)|
 
-
 | dbname | accuracy |
 | ----- |:-----:|
 | lfw |0.9772|
@@ -71,6 +70,18 @@ The results are worse than the insightface model because:
 | cfp_fp |0.8786|
 | age_db30 |0.8752|
 
+
+##### model B
+| model name    | train db| normalization layer |batch size| total_steps | download |
+| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|
+| model B | ms1m |batch renormalization|16*8| 388k |[model b](https://drive.google.com/open?id=1PBDCw69nc3Ld02tj1n-ScFEbamzug7sW)|
+
+| dbname | accuracy |
+| ----- |:-----:|
+| lfw |0.9942|
+| cfp_ff |0.9944|
+| cfp_fp |0.9237|
+| age_db30 |0.9502|
 
 ## TODO
 * ~~The batch size must be bigger but the gpu is exhausted.~~ -> Now using batch ~~128~~ 96 by updating the gradients after several inferences. 
