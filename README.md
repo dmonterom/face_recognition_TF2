@@ -54,7 +54,7 @@ python3 evaluation.py
 The results are worse than the insightface model because: 
 * ~~The training epochs are not enough.~~
 * ~~The batch size should be bigger (16 used), as discused [here](https://github.com/deepinsight/insightface/issues/91) and [here](https://github.com/deepinsight/insightface/issues/86)~~
-* The training dataset used there has 85K ids and 5.8M images while the dataset used in this project has 10K ids and 0.5M images.
+* ~~The training dataset used there has 85K ids and 5.8M images while the dataset used in this project has 10K ids and 0.5M images.~~ -> see model B
 
 #### Trained models
 
@@ -88,7 +88,7 @@ The results are worse than the insightface model because:
 * ~~Further training of the net to improve accuracy.~~
 * ~~Add batch renormalization for training using small batches.~~ ([link](https://arxiv.org/pdf/1702.03275.pdf))
 * ~~Add group normalization for training using small batches.~~ ([link](https://arxiv.org/pdf/1803.08494.pdf))
-* Train the model with a bigger dataset.
+* ~~Train the model with a bigger dataset.~~
 * Add quantization awareness to training. This is not yet possible in TensorFlow 2.0 because it was part of the contrib module, which has been removed in the new version, as commented in [this issue](https://github.com/tensorflow/tensorflow/issues/27880).
 * Test other network architectures.
 
