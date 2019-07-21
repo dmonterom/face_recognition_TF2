@@ -3,9 +3,9 @@ from resnet_batchRenorm import train_model
 # from resnet import train_model
 import tensorflow as tf
 
-batch_size = 16
-batch_multiplier = 6
+batch_size = 128
 reg_coef = 1.0
+learning_rate = 0.001
 
 
 def parse_function(example_proto):
@@ -24,65 +24,72 @@ def parse_function(example_proto):
     return img, label
 
 
-dataset = tf.data.TFRecordDataset(
-    'dataset/converted_dataset/ms1m_train.tfrecord')
-dataset = dataset.map(parse_function)
-dataset = dataset.shuffle(buffer_size=20000)
-dataset = dataset.batch(batch_size * batch_multiplier)
+strategy = tf.distribute.experimental.CentralStorageStrategy()
+# strategy = tf.distribute.MirroredStrategy()
+num_replicas = strategy.num_replicas_in_sync
 
-print("Preparing model...")
 
-model = train_model()
+with strategy.scope():
 
-learning_rate = 0.0005
-optimizer = tf.keras.optimizers.SGD(
-    lr=learning_rate, momentum=0.9, nesterov=False)
-# optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
-# optimizer = tf.keras.optimizers.Adagrad(lr=learning_rate, decay=0.0)
+    dataset = tf.data.TFRecordDataset(
+        'dataset/converted_dataset/ms1m_train.tfrecord')
+    dataset = dataset.map(parse_function)
+    dataset = dataset.shuffle(buffer_size=100000)
+    dataset = dataset.batch(batch_size * num_replicas)
+    dist_dataset = strategy.experimental_distribute_dataset(dataset)
+
+    print("Preparing model...")
+
+    model = train_model()
+
+    optimizer = tf.keras.optimizers.SGD(
+        lr=learning_rate, momentum=0.9, nesterov=False)
+    # optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
+    # optimizer = tf.keras.optimizers.Adagrad(lr=learning_rate, decay=0.0)
 
 
 @tf.function
-def train_step(images, labels, regCoef):
-    # print(images, labels)
-    with tf.GradientTape() as tape:
-        logits = model(tf.slice(images, [0, 0, 0, 0], [
-                       batch_size, 112, 112, 3]), tf.slice(labels, [0], [batch_size]))
-        for i in range(batch_multiplier - 1):
-            logits = tf.concat([logits, model(tf.slice(images, [batch_size * (i + 1), 0, 0, 0], [
-                               batch_size, 112, 112, 3]), tf.slice(labels, [batch_size * (i + 1)], [batch_size]))], 0)
-        pred = tf.nn.softmax(logits)
-        inf_loss = tf.reduce_mean(
-            tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels))
-        reg_loss = tf.add_n(model.losses)
-        loss = inf_loss + reg_loss * regCoef
-    gradients = tape.gradient(loss, model.trainable_variables)
-    optimizer.apply_gradients(zip(gradients, model.trainable_variables))
-    train_loss = tf.reduce_mean(loss)
-    accuracy = tf.reduce_mean(
-        tf.cast(tf.equal(tf.argmax(pred, axis=1, output_type=tf.dtypes.int32), labels), dtype=tf.float32))
-    inference_loss = tf.reduce_mean(inf_loss)
-    regularization_loss = tf.reduce_mean(reg_loss)
+def train_step(_images, _labels, _regCoef):
+    def step_fn(images, labels, regCoef):
+        with tf.GradientTape() as tape:
+            logits = model(images, labels)
+            pred = tf.nn.softmax(logits)
+            inf_loss = tf.reduce_sum(
+                tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits, labels=labels)) * (1.0 / batch_size)
+            reg_loss = tf.add_n(model.losses)
+            loss = (inf_loss + reg_loss * regCoef) * (1.0 / num_replicas)
+        gradients = tape.gradient(loss, model.trainable_variables)
+        optimizer.apply_gradients(
+            zip(gradients, model.trainable_variables))
+        accuracy = tf.reduce_mean(
+            tf.cast(tf.equal(tf.argmax(pred, axis=1, output_type=tf.dtypes.int32), labels), dtype=tf.float32))
+        return loss, inf_loss, reg_loss, accuracy
+    loss, inf_loss, reg_loss, accuracy = strategy.experimental_run_v2(
+        step_fn, args=(_images, _labels, _regCoef,))
+    train_loss = strategy.reduce(
+        tf.distribute.ReduceOp.SUM, loss, axis=None)
+    inference_loss = strategy.reduce(
+        tf.distribute.ReduceOp.MEAN, inf_loss, axis=None)
+    regularization_loss = strategy.reduce(
+        tf.distribute.ReduceOp.MEAN, reg_loss, axis=None)
+    accuracy = strategy.reduce(
+        tf.distribute.ReduceOp.MEAN, accuracy, axis=None)
     return accuracy, train_loss, inference_loss, regularization_loss
 
 
 EPOCHS = 100000
 
 # create log
-summary_writer = tf.summary.create_file_writer('output/log')
+summary_writer = tf.summary.create_file_writer('output/logs_sgd_6')
 
-lr_steps = [int(40000 * 512 / (batch_size * batch_multiplier)),
-            int(60000 * 512 / (batch_size * batch_multiplier)),
-            int(80000 * 512 / (batch_size * batch_multiplier)),
-            int(120000 * 512 / (batch_size * batch_multiplier))]
+lr_steps = [int(40000 * 512 / (batch_size * num_replicas)),
+            int(70000 * 512 / (batch_size * num_replicas)),
+            int(100000 * 512 / (batch_size * num_replicas)),
+            int(140000 * 512 / (batch_size * num_replicas))]
 print(lr_steps)
 step = 0
 for epoch in range(EPOCHS):
-    iterator = iter(dataset)
-    while True:
-        img, label = next(iterator)
-        if (img.shape[0] != batch_size * batch_multiplier or img.shape[0] != label.shape[0]):
-            print("End of epoch {}".format(epoch + 1))
-            break
+    for img, label in dist_dataset:
         step += 1
         accuracy, train_loss, inference_loss, regularization_loss = train_step(
             img, label, reg_coef)
@@ -115,9 +122,10 @@ for epoch in range(EPOCHS):
                 # tf.summary.histogram('name', layer_output)
         if step % 4000 == 0 and step > 0:
             model.save_weights(
-                'output/ckpt/weights_step-{}'.format(step))
+                'output/ckpt/ckpt_sgd_6/weights_step-{}'.format(step))
         for lr_step in lr_steps:
             if lr_step == step:
                 optimizer.lr = optimizer.lr * 0.5
         if inference_loss * 1.0 < regularization_loss * reg_coef:
             reg_coef = reg_coef * 0.8
+    print("End of epoch {}".format(epoch + 1))

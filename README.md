@@ -10,6 +10,13 @@ The full training and evaluation code is provided.
 
 A Dockerfile is also provided with all prerequisites installed.
 
+**UPDATE** Increased single GPU batch size by updating the gradients after several inferences (96 in TESLA P100).
+
+**UPDATE** Added Batch Renormalization and Group Normalization for training using smaller batches.
+
+**UPDATE** Added regularization loss decay coefficient for reducing the impact of the regularization loss when the inference loss becomes smaller.
+
+**UPDATE** Added multi gpu training code. It uses the experimental central storage strategy, which stores all the variables in the CPU and allows increasing the batch size on each GPU (128 for each TESLA P100).
 
 ### Prerequisites
 
@@ -33,8 +40,16 @@ python3 convert_dataset.py
 
 ### Training the model
 
+For training using 1 GPU:
+
 ```
 python3 train.py
+```
+
+For training using multiple GPU:
+
+```
+python3 train_multigpu.py
 ```
 
 The training process can be followed loading the generated log file (in output/logs) with tensorboard.
@@ -49,14 +64,7 @@ Before launching the test, you may change the checkpoint path in the evaluation.
 python3 evaluation.py
 ```
 
-### accuracy
-
-The results are worse than the insightface model because: 
-* ~~The training epochs are not enough.~~
-* ~~The batch size should be bigger (16 used), as discused [here](https://github.com/deepinsight/insightface/issues/91) and [here](https://github.com/deepinsight/insightface/issues/86)~~
-* ~~The training dataset used there has 85K ids and 5.8M images while the dataset used in this project has 10K ids and 0.5M images.~~ -> see model B
-
-#### Trained models
+### Trained models
 
 ##### model A
 | model name    | train db| normalization layer |batch size| total_steps | download |
@@ -72,19 +80,19 @@ The results are worse than the insightface model because:
 
 
 ##### model B
-| model name    | train db| normalization layer |batch size| total_steps | download |
+| model name    | train db| normalization layer |reg loss|batch size| total_steps | download |
 | ----- |:-----:|:-----:|:-----:|:-----:|:-----:|
-| model B | ms1m |batch renormalization|16*8| 400k |[model b](https://drive.google.com/open?id=1PBDCw69nc3Ld02tj1n-ScFEbamzug7sW)|
+| model B | ms1m |batch renormalization|uncontrolled|16*8| 768k |[model b](https://drive.google.com/open?id=1PBDCw69nc3Ld02tj1n-ScFEbamzug7sW)|
 
 | dbname | accuracy |
 | ----- |:-----:|
-| lfw |0.9955|
-| cfp_ff |0.9954|
-| cfp_fp |0.9266|
-| age_db30 |0.9540|
+| lfw |0.9962|
+| cfp_ff |0.9964|
+| cfp_fp |0.9329|
+| age_db30 |0.9547|
 
 ## TODO
-* ~~The batch size must be bigger but the gpu is exhausted.~~ -> Now using batch ~~128~~ 96 by updating the gradients after several inferences. 
+* ~~The batch size must be bigger but the gpu is exhausted. -> Now using batch ~~128~~ 96 by updating the gradients after several inferences.~~ -> Now using 2 GPU with batch size 128 on each GPU with the central storage strategy.
 * ~~Further training of the net to improve accuracy.~~
 * ~~Add batch renormalization for training using small batches.~~ ([link](https://arxiv.org/pdf/1702.03275.pdf))
 * ~~Add group normalization for training using small batches.~~ ([link](https://arxiv.org/pdf/1803.08494.pdf))
@@ -96,3 +104,6 @@ The results are worse than the insightface model because:
 1. [InsightFace mxnet](https://github.com/deepinsight/insightface)
 2. [InsightFace : Additive Angular Margin Loss for Deep Face Recognition](https://arxiv.org/abs/1801.07698)
 3. [InsightFace_TF](https://raw.githubusercontent.com/auroua/InsightFace_TF)
+4. [Batch Renormalization](https://arxiv.org/pdf/1702.03275.pdf)
+5. [Group Normalization](https://arxiv.org/pdf/1803.08494.pdf)
+6. [Multi GPU Central Storage Strategy](https://www.tensorflow.org/api_docs/python/tf/distribute/experimental/CentralStorageStrategy)
