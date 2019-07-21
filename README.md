@@ -67,9 +67,9 @@ python3 evaluation.py
 ### Trained models
 
 ##### model A
-| model name    | train db| normalization layer |batch size| total_steps | download |
-| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|
-| model A | casia |batch normalization|16*8| 150k |[model a](https://drive.google.com/open?id=1RrVazZAWgDL26HxtacdeHfOADWERDUHK)|
+| model name    | train db| normalization layer |reg loss|batch size| total_steps | download |
+| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+| model A | casia |batch normalization|uncontrolled|16*8| 150k |[model a](https://drive.google.com/open?id=1RrVazZAWgDL26HxtacdeHfOADWERDUHK)|
 
 | dbname | accuracy |
 | ----- |:-----:|
@@ -81,7 +81,7 @@ python3 evaluation.py
 
 ##### model B
 | model name    | train db| normalization layer |reg loss|batch size| total_steps | download |
-| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|
+| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
 | model B | ms1m |batch renormalization|uncontrolled|16*8| 768k |[model b](https://drive.google.com/open?id=1PBDCw69nc3Ld02tj1n-ScFEbamzug7sW)|
 
 | dbname | accuracy |
