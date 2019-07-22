@@ -80,7 +80,7 @@ def train_step(_images, _labels, _regCoef):
 EPOCHS = 100000
 
 # create log
-summary_writer = tf.summary.create_file_writer('output/logs_sgd_6')
+summary_writer = tf.summary.create_file_writer('output/log')
 
 lr_steps = [int(40000 * 512 / (batch_size * num_replicas)),
             int(70000 * 512 / (batch_size * num_replicas)),
@@ -122,7 +122,7 @@ for epoch in range(EPOCHS):
                 # tf.summary.histogram('name', layer_output)
         if step % 4000 == 0 and step > 0:
             model.save_weights(
-                'output/ckpt/ckpt_sgd_6/weights_step-{}'.format(step))
+                'output/ckpt/weights_step-{}'.format(step))
         for lr_step in lr_steps:
             if lr_step == step:
                 optimizer.lr = optimizer.lr * 0.5
