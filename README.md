@@ -2,11 +2,11 @@
 
 The aim of this project is to train a state of art face recognizer using TensorFlow 2.0. The architecture chosen is a modified version of ResNet50 and the loss function used is [ArcFace](https://arxiv.org/pdf/1801.07698.pdf), both originally developed by deepinsight in [mxnet](https://github.com/deepinsight/insightface).
 
-The dataset used for training is the ~~CASIA-Webface~~ MS1M-ArcFace dataset used in [insightface](https://github.com/deepinsight/insightface), and it is available their [model zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo). The images are aligned using mtcnn and cropped to 112x112.
+The dataset used for training is the ~~CASIA-Webface~~ MS1M-ArcFace dataset used in [insightface](https://github.com/deepinsight/insightface), and it is available their [dataset zoo](https://github.com/deepinsight/insightface/wiki/Dataset-Zoo). The images are aligned using mtcnn and cropped to 112x112.
 
 The results of the training are evaluated with lfw, cfp_ff, cfp_fp and age_db30, using the same metrics as deepinsight.
 
-The full training and evaluation code is provided.
+The full training and evaluation code is provided, as well as some trained weights.
 
 A Dockerfile is also provided with all prerequisites installed.
 
