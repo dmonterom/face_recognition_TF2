@@ -18,7 +18,7 @@ A Dockerfile is also provided with all prerequisites installed.
 
 **UPDATE** Added multi gpu training code. It uses the experimental central storage strategy, which stores all the variables in the CPU and allows increasing the batch size on each GPU (128 for each TESLA P100).
 
-**UPDATE** Added model C, trained with 4 gpus TESLA P100.
+**UPDATE** Added model C, trained with 3 gpus TESLA P100.
 
 ### Prerequisites
 
