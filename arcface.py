@@ -2,6 +2,11 @@ import tensorflow as tf
 import math
 
 num_classes = 85742  # 10572
+initializer = 'glorot_normal'
+# initializer = tf.keras.initializers.TruncatedNormal(
+#     mean=0.0, stddev=0.05, seed=None)
+# initializer = tf.keras.initializers.VarianceScaling(
+#     scale=0.05, mode='fan_avg', distribution='normal', seed=None)
 
 
 class Arcfacelayer(tf.keras.layers.Layer):
@@ -15,7 +20,7 @@ class Arcfacelayer(tf.keras.layers.Layer):
         self.kernel = self.add_weight(name='kernel',
                                       shape=(input_shape[-1],
                                              self.output_dim),
-                                      initializer='glorot_normal',
+                                      initializer=initializer,
                                       regularizer=tf.keras.regularizers.l2(
                                           l=5e-4),
                                       trainable=True)

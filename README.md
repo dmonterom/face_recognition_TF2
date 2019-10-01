@@ -18,6 +18,8 @@ A Dockerfile is also provided with all prerequisites installed.
 
 **UPDATE** Added multi gpu training code. It uses the experimental central storage strategy, which stores all the variables in the CPU and allows increasing the batch size on each GPU (128 for each TESLA P100).
 
+**UPDATE** Added model C, trained with 4 gpus TESLA P100.
+
 ### Prerequisites
 
 If you are not using the provided Dockerfile, you will need to install the following packages:
@@ -67,9 +69,9 @@ python3 evaluation.py
 ### Trained models
 
 ##### model A
-| model name    | train db| normalization layer |reg loss|batch size| total_steps | download |
+| model name    | train db| normalization layer |reg loss|batch size|gpus| total_steps | download |
 | ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-| model A | casia |batch normalization|uncontrolled|16*8| 150k |[model a](https://drive.google.com/open?id=1RrVazZAWgDL26HxtacdeHfOADWERDUHK)|
+| model A | casia |batch normalization|uncontrolled|16*8|1| 150k |[model a](https://drive.google.com/open?id=1RrVazZAWgDL26HxtacdeHfOADWERDUHK)|
 
 | dbname | accuracy |
 | ----- |:-----:|
@@ -80,9 +82,9 @@ python3 evaluation.py
 
 
 ##### model B
-| model name    | train db| normalization layer |reg loss|batch size| total_steps | download |
+| model name    | train db| normalization layer |reg loss|batch size|gpus| total_steps | download |
 | ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
-| model B | ms1m |batch renormalization|uncontrolled|16*8| 768k |[model b](https://drive.google.com/open?id=1PBDCw69nc3Ld02tj1n-ScFEbamzug7sW)|
+| model B | ms1m |batch renormalization|uncontrolled|16*8|1| 768k |[model b](https://drive.google.com/open?id=1PBDCw69nc3Ld02tj1n-ScFEbamzug7sW)|
 
 | dbname | accuracy |
 | ----- |:-----:|
@@ -90,6 +92,18 @@ python3 evaluation.py
 | cfp_ff |0.9964|
 | cfp_fp |0.9329|
 | age_db30 |0.9547|
+
+##### model C (multigpu)
+| model name    | train db| normalization layer |reg loss|batch size|gpus| download |
+| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+| model C | ms1m |batch renormalization|uncontrolled|384|3|[model c](https://drive.google.com/open?id=1VqxJVsTARgRNACsscgPPQt7UJxalLlnz)|
+
+| dbname | accuracy |
+| ----- |:-----:|
+| lfw |0.9967|
+| cfp_ff |0.9970|
+| cfp_fp |0.9403|
+| age_db30 |0.9652|
 
 ## TODO
 * ~~The batch size must be bigger but the gpu is exhausted. -> Now using batch ~~128~~ 96 by updating the gradients after several inferences.~~ -> Now using 2 GPU with batch size 128 on each GPU with the central storage strategy.

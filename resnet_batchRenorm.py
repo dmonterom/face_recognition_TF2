@@ -4,7 +4,17 @@ from arcface import Arcfacelayer
 
 bn_axis = -1
 initializer = 'glorot_normal'
-reg_value = 5e-4
+# initializer = tf.keras.initializers.TruncatedNormal(
+#     mean=0.0, stddev=0.05, seed=None)
+# initializer = tf.keras.initializers.VarianceScaling(
+#     scale=0.05, mode='fan_avg', distribution='normal', seed=None)
+# initializer = tf.keras.initializers.RandomNormal(
+#     mean=0.0, stddev=0.01, seed=None)
+# initializer = tf.keras.initializers.RandomUniform(
+#     minval=-0.0001, maxval=0.0001, seed=None)
+gammaInit = 'ones'
+# gammaInit = tf.keras.initializers.Constant(value=1.0)
+# maxNorm = 0.1
 
 
 def residual_unit_v3(input, num_filter, stride, dim_match, name):
@@ -17,10 +27,11 @@ def residual_unit_v3(input, num_filter, stride, dim_match, name):
                                                             'rmin': 0.3333,
                                                             'dmax': 5},
                                            renorm_momentum=0.9,
-                                           #    beta_regularizer=tf.keras.regularizers.l2(
-                                           #        l=reg_value),
+                                           beta_regularizer=tf.keras.regularizers.l2(
+                                               l=5e-4),
                                            gamma_regularizer=tf.keras.regularizers.l2(
-                                               l=reg_value),
+                                               l=5e-4),
+                                           gamma_initializer=gammaInit,
                                            name=name + '_bn1')(input)
     x = tf.keras.layers.ZeroPadding2D(
         padding=(1, 1), name=name + '_conv1_pad')(x)
@@ -30,7 +41,7 @@ def residual_unit_v3(input, num_filter, stride, dim_match, name):
                                kernel_initializer=initializer,
                                use_bias=False,
                                kernel_regularizer=tf.keras.regularizers.l2(
-                                   l=reg_value),
+                                   l=5e-4),
                                name=name + '_conv1')(x)
     x = tf.keras.layers.BatchNormalization(axis=bn_axis,
                                            scale=True,
@@ -41,14 +52,15 @@ def residual_unit_v3(input, num_filter, stride, dim_match, name):
                                                             'rmin': 0.3333,
                                                             'dmax': 5},
                                            renorm_momentum=0.9,
-                                           #    beta_regularizer=tf.keras.regularizers.l2(
-                                           #        l=reg_value),
+                                           beta_regularizer=tf.keras.regularizers.l2(
+                                               l=5e-4),
                                            gamma_regularizer=tf.keras.regularizers.l2(
-                                               l=reg_value),
+                                               l=5e-4),
+                                           gamma_initializer=gammaInit,
                                            name=name + '_bn2')(x)
     x = tf.keras.layers.PReLU(name=name + '_relu1',
                               alpha_regularizer=tf.keras.regularizers.l2(
-                                  l=reg_value))(x)
+                                  l=5e-4))(x)
     x = tf.keras.layers.ZeroPadding2D(
         padding=(1, 1), name=name + '_conv2_pad')(x)
     x = tf.keras.layers.Conv2D(num_filter, (3, 3),
@@ -57,7 +69,7 @@ def residual_unit_v3(input, num_filter, stride, dim_match, name):
                                kernel_initializer=initializer,
                                use_bias=False,
                                kernel_regularizer=tf.keras.regularizers.l2(
-                                   l=reg_value),
+                                   l=5e-4),
                                name=name + '_conv2')(x)
     x = tf.keras.layers.BatchNormalization(axis=bn_axis,
                                            scale=True,
@@ -68,10 +80,11 @@ def residual_unit_v3(input, num_filter, stride, dim_match, name):
                                                             'rmin': 0.3333,
                                                             'dmax': 5},
                                            renorm_momentum=0.9,
-                                           #    beta_regularizer=tf.keras.regularizers.l2(
-                                           #        l=reg_value),
+                                           beta_regularizer=tf.keras.regularizers.l2(
+                                               l=5e-4),
                                            gamma_regularizer=tf.keras.regularizers.l2(
-                                               l=reg_value),
+                                               l=5e-4),
+                                           gamma_initializer=gammaInit,
                                            name=name + '_bn3')(x)
     if (dim_match):
         shortcut = input
@@ -82,7 +95,7 @@ def residual_unit_v3(input, num_filter, stride, dim_match, name):
                                           kernel_initializer=initializer,
                                           use_bias=False,
                                           kernel_regularizer=tf.keras.regularizers.l2(
-                                              l=reg_value),
+                                              l=5e-4),
                                           name=name + '_conv1sc')(input)
         shortcut = tf.keras.layers.BatchNormalization(axis=bn_axis,
                                                       scale=True,
@@ -94,10 +107,11 @@ def residual_unit_v3(input, num_filter, stride, dim_match, name):
                                                           'rmin': 0.3333,
                                                           'dmax': 5},
                                                       renorm_momentum=0.9,
-                                                      #   beta_regularizer=tf.keras.regularizers.l2(
-                                                      #       l=reg_value),
+                                                      beta_regularizer=tf.keras.regularizers.l2(
+                                                          l=5e-4),
                                                       gamma_regularizer=tf.keras.regularizers.l2(
-                                                          l=reg_value),
+                                                          l=5e-4),
+                                                      gamma_initializer=gammaInit,
                                                       name=name + '_sc')(shortcut)
     return x + shortcut
 
@@ -112,10 +126,11 @@ def get_fc1(input):
                                                             'rmin': 0.3333,
                                                             'dmax': 5},
                                            renorm_momentum=0.9,
-                                           #    beta_regularizer=tf.keras.regularizers.l2(
-                                           #        l=reg_value),
+                                           beta_regularizer=tf.keras.regularizers.l2(
+                                               l=5e-4),
                                            gamma_regularizer=tf.keras.regularizers.l2(
-                                               l=reg_value),
+                                               l=5e-4),
+                                           gamma_initializer=gammaInit,
                                            name='bn1')(input)
     x = tf.keras.layers.Dropout(0.4)(x)
     resnet_shape = input.shape
@@ -124,9 +139,9 @@ def get_fc1(input):
     x = tf.keras.layers.Dense(512,
                               name='E_DenseLayer', kernel_initializer=initializer,
                               kernel_regularizer=tf.keras.regularizers.l2(
-                                  l=reg_value),
+                                  l=5e-4),
                               bias_regularizer=tf.keras.regularizers.l2(
-                                  l=reg_value))(x)
+                                  l=5e-4))(x)
     x = tf.keras.layers.BatchNormalization(axis=-1,
                                            scale=False,
                                            momentum=0.9,
@@ -136,8 +151,8 @@ def get_fc1(input):
                                                             'rmin': 0.3333,
                                                             'dmax': 5},
                                            renorm_momentum=0.9,
-                                           #    beta_regularizer=tf.keras.regularizers.l2(
-                                           #        l=reg_value),
+                                           beta_regularizer=tf.keras.regularizers.l2(
+                                               l=5e-4),
                                            name='fc1')(x)
     return x
 
@@ -159,7 +174,7 @@ def ResNet50():
                                kernel_initializer=initializer,
                                use_bias=False,
                                kernel_regularizer=tf.keras.regularizers.l2(
-                                   l=reg_value),
+                                   l=5e-4),
                                name='conv0')(x)
     x = tf.keras.layers.BatchNormalization(axis=bn_axis,
                                            scale=True,
@@ -170,16 +185,16 @@ def ResNet50():
                                                             'rmin': 0.3333,
                                                             'dmax': 5},
                                            renorm_momentum=0.9,
-                                           #    beta_regularizer=tf.keras.regularizers.l2(
-                                           #        l=reg_value),
+                                           beta_regularizer=tf.keras.regularizers.l2(
+                                               l=5e-4),
                                            gamma_regularizer=tf.keras.regularizers.l2(
-                                               l=reg_value),
+                                               l=5e-4),
+                                           gamma_initializer=gammaInit,
                                            name='bn0')(x)
-    # x = tf.keras.layers.Activation('prelu')(x)
     x = tf.keras.layers.PReLU(
         name='prelu0',
         alpha_regularizer=tf.keras.regularizers.l2(
-            l=reg_value))(x)
+            l=5e-4))(x)
 
     for i in range(num_stages):
         x = residual_unit_v3(x, filter_list[i + 1], (2, 2), False,
