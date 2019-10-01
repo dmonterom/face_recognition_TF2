@@ -83,7 +83,7 @@ python3 evaluation.py
 
 ##### model B
 | model name    | train db| normalization layer |reg loss|batch size|gpus| total_steps | download |
-| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
 | model B | ms1m |batch renormalization|uncontrolled|16*8|1| 768k |[model b](https://drive.google.com/open?id=1PBDCw69nc3Ld02tj1n-ScFEbamzug7sW)|
 
 | dbname | accuracy |
@@ -95,7 +95,7 @@ python3 evaluation.py
 
 ##### model C (multigpu)
 | model name    | train db| normalization layer |reg loss|batch size|gpus| download |
-| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
 | model C | ms1m |batch renormalization|uncontrolled|384|3|[model c](https://drive.google.com/open?id=1VqxJVsTARgRNACsscgPPQt7UJxalLlnz)|
 
 | dbname | accuracy |
