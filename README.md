@@ -70,7 +70,7 @@ python3 evaluation.py
 
 ##### model A
 | model name    | train db| normalization layer |reg loss|batch size|gpus| total_steps | download |
-| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
 | model A | casia |batch normalization|uncontrolled|16*8|1| 150k |[model a](https://drive.google.com/open?id=1RrVazZAWgDL26HxtacdeHfOADWERDUHK)|
 
 | dbname | accuracy |
@@ -95,7 +95,7 @@ python3 evaluation.py
 
 ##### model C (multigpu)
 | model name    | train db| normalization layer |reg loss|batch size|gpus| download |
-| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
+| ----- |:-----:|:-----:|:-----:|:-----:|:-----:|:-----:|
 | model C | ms1m |batch renormalization|uncontrolled|384|3|[model c](https://drive.google.com/open?id=1VqxJVsTARgRNACsscgPPQt7UJxalLlnz)|
 
 | dbname | accuracy |
